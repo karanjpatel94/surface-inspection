@@ -22,24 +22,25 @@
 
         async function init() {
             alert("✅ Init is working");
+try { 
+console.log("Step 1: Loading model...");
 
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
-try {
+
+console.log("✅ Step 2: Model loaded");
+
+        console.log("Step 3: Starting webcam...");
+
             webcam = new tmImage.Webcam(350, 350, true);
             await webcam.setup();
             await webcam.play();
-
+console.log("✅ Step 4: Webcam started");
             document.getElementById("webcam-container").appendChild(webcam.canvas);
-console.log("✅ Camera started");
-}
-catch (err) {
-    console.error("Camera error:", err);
-    alert("Camera error: " + err.message);
-}
+
 
             labelContainer = document.getElementById("label-container");
             labelContainer.innerHTML = "";
