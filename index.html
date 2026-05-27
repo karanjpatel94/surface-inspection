@@ -11,11 +11,9 @@
     <div id="webcam-container"></div>
     <div id="label-container"></div>
 
-    
-<!-- ✅ FIXED SCRIPT LINKS -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-<script>
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjssrc="https://cdn.jsdelivr.net/npm/@teachablemachine/image  <!-- ✅ YOUR CODE -->
+    <script>
         const URL = "./my_model/";
 
         let model, webcam, labelContainer, maxPredictions;
@@ -30,6 +28,7 @@
             webcam = new tmImage.Webcam(350, 350, true);
             await webcam.setup();
             await webcam.play();
+
             window.requestAnimationFrame(loop);
 
             document.getElementById("webcam-container").appendChild(webcam.canvas);
@@ -88,14 +87,15 @@
                 resultDiv.style.fontSize = "30px";
                 resultDiv.style.fontWeight = "bold";
                 resultDiv.style.marginTop = "20px";
+                resultDiv.style.textAlign = "center";
                 document.body.appendChild(resultDiv);
             }
 
             resultDiv.innerHTML = resultText;
             resultDiv.style.backgroundColor = bgColor;
             resultDiv.style.padding = "10px";
-            resultDiv.style.textAlign = "center";
         }
     </script>
+
 </body>
 </html>
