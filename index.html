@@ -1,0 +1,54 @@
+async function predict() {
+    const prediction = await model.predict(webcam.canvas);
+
+    let passProb = 0;
+    let failProb = 0;
+
+    // Find probabilities
+    for (let i = 0; i < maxPredictions; i++) {
+        if (prediction[i].className.toLowerCase() === "pass") {
+            passProb = prediction[i].probability;
+        } else if (prediction[i].className.toLowerCase() === "fail") {
+            failProb = prediction[i].probability;
+        }
+
+        // still show raw values (optional)
+        const classPrediction =
+            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+        labelContainer.childNodes[i].innerHTML = classPrediction;
+    }
+
+    // Decision logic
+    let resultText = "";
+    let bgColor = "";
+
+    if (passProb >= 0.8) {
+        resultText = "✅ PASS";
+        bgColor = "lightgreen";
+    } 
+    else if (failProb >= 0.8) {
+        resultText = "❌ FAIL";
+        bgColor = "red";
+    } 
+    else {
+        resultText = "⚠️ UNCERTAIN";
+        bgColor = "orange";
+    }
+
+    // Show result (create or update)
+    let resultDiv = document.getElementById("result");
+
+    if (!resultDiv) {
+        resultDiv = document.createElement("div");
+        resultDiv.id = "result";
+        resultDiv.style.fontSize = "30px";
+        resultDiv.style.fontWeight = "bold";
+        resultDiv.style.marginTop = "20px";
+        document.body.appendChild(resultDiv);
+    }
+
+    resultDiv.innerHTML = resultText;
+    resultDiv.style.backgroundColor = bgColor;
+    resultDiv.style.padding = "10px";
+}
+``
