@@ -1,94 +1,41 @@
-<script>
-console.log("Script loaded");
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Surface Inspection</title>
+</head>
 
-const URL = "./my_model/";
+<body>
+    <h2>Surface Inspection System</h2>
+    <button onclick="init()">Start</button>
 
-let model, webcam, labelContainer, maxPredictions;
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
 
-async function init() {
-    alert("Init is working");
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
+    <script>
+        const URL = "./my_model/";
 
-    console.log("Loading model...");
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
+        let model, webcam, labelContainer, maxPredictions;
 
-    console.log("Starting webcam...");
-    webcam = new tmImage.Webcam(350, 350, true);
-  await webcam.setup();
-await webcam.play();
+        async function init() {
+            alert("✅ Init is working");
+
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            webcam = new tmImage.Webcam(350, 350, true);
+            await webcam.setup();
+            await webcam.play();
+
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+            labelContainer = document.getElementById("label-container");
+            labelContainer.innerHTML = "";
 
 
-    document.getElementById("webcam-container").appendChild(webcam.canvas);
-
-    labelContainer = document.getElementById("label-container");
-    labelContainer.innerHTML = "";
-
-    for (let i = 0; i < maxPredictions; i++) {
-        labelContainer.appendChild(document.createElement("div"));
-    }
-
-    window.requestAnimationFrame(loop);
-}
-
-async function loop() {
-    webcam.update();
-    await predict();
-    window.requestAnimationFrame(loop);
-}
-
-async function predict() {
-    const prediction = await model.predict(webcam.canvas);
-
-    let passProb = 0;
-    let failProb = 0;
-
-    for (let i = 0; i < maxPredictions; i++) {
-
-        if (prediction[i].className.toLowerCase() === "pass") {
-            passProb = prediction[i].probability;
-        } 
-        else if (prediction[i].className.toLowerCase() === "fail") {
-            failProb = prediction[i].probability;
-        }
-
-        labelContainer.childNodes[i].innerHTML =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-    }
-
-    let resultText = "";
-    let bgColor = "";
-
-    if (passProb >= 0.8) {
-        resultText = "✅ PASS";
-        bgColor = "lightgreen";
-    } 
-    else if (failProb >= 0.8) {
-        resultText = "❌ FAIL";
-        bgColor = "red";
-    } 
-    else {
-        resultText = "⚠️ UNCERTAIN";
-        bgColor = "orange";
-    }
-
-    let resultDiv = document.getElementById("result");
-
-    if (!resultDiv) {
-        resultDiv = document.createElement("div");
-        resultDiv.id = "result";
-        resultDiv.style.fontSize = "30px";
-        resultDiv.style.fontWeight = "bold";
-        resultDiv.style.marginTop = "20px";
-        resultDiv.style.textAlign = "center";
-        document.body.appendChild(resultDiv);
-    }
-
-    resultDiv.innerHTML = resultText;
-    resultDiv.style.backgroundColor = bgColor;
-    resultDiv.style.padding = "10px";
-}
-</script>
-``
