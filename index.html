@@ -38,4 +38,68 @@
             labelContainer = document.getElementById("label-container");
             labelContainer.innerHTML = "";
 
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+
+            window.requestAnimationFrame(loop);
+        }
+
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+
+            let passProb = 0;
+            let failProb = 0;
+
+            for (let i = 0; i < maxPredictions; i++) {
+                if (prediction[i].className.toLowerCase() === "pass") {
+                    passProb = prediction[i].probability;
+                } else if (prediction[i].className.toLowerCase() === "fail") {
+                    failProb = prediction[i].probability;
+                }
+
+                labelContainer.childNodes[i].innerHTML =
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+            }
+
+            let resultText = "";
+            let bgColor = "";
+
+            if (passProb >= 0.8) {
+                resultText = "✅ PASS";
+                bgColor = "lightgreen";
+            } else if (failProb >= 0.8) {
+                resultText = "❌ FAIL";
+                bgColor = "red";
+            } else {
+                resultText = "⚠️ UNCERTAIN";
+                bgColor = "orange";
+            }
+
+            let resultDiv = document.getElementById("result");
+
+            if (!resultDiv) {
+                resultDiv = document.createElement("div");
+                resultDiv.id = "result";
+                resultDiv.style.fontSize = "30px";
+                resultDiv.style.fontWeight = "bold";
+                resultDiv.style.marginTop = "20px";
+                resultDiv.style.textAlign = "center";
+                document.body.appendChild(resultDiv);
+            }
+
+            resultDiv.innerHTML = resultText;
+            resultDiv.style.backgroundColor = bgColor;
+            resultDiv.style.padding = "10px";
+        }
+    </script>
+</body>
+</html>
+
 
