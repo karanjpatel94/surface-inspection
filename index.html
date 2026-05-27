@@ -1,54 +1,99 @@
-async function predict() {
-    const prediction = await model.predict(webcam.canvas);
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Surface Inspection</title>
+</head>
 
-    let passProb = 0;
-    let failProb = 0;
+<body>
+    <h2>Surface Inspection System</h2>
+    <button onclick="init()">Start</button>
 
-    // Find probabilities
-    for (let i = 0; i < maxPredictions; i++) {
-        if (prediction[i].className.toLowerCase() === "pass") {
-            passProb = prediction[i].probability;
-        } else if (prediction[i].className.toLowerCase() === "fail") {
-            failProb = prediction[i].probability;
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+
+    <!-- ✅ FIXED SCRIPT LINKS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/t<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min
+    <script>
+        const URL = "./my_model/";
+
+        let model, webcam, labelContainer, maxPredictions;
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            webcam = new tmImage.Webcam(350, 350, true);
+            await webcam.setup();
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
         }
 
-        // still show raw values (optional)
-        const classPrediction =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
-    }
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
 
-    // Decision logic
-    let resultText = "";
-    let bgColor = "";
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
 
-    if (passProb >= 0.8) {
-        resultText = "✅ PASS";
-        bgColor = "lightgreen";
-    } 
-    else if (failProb >= 0.8) {
-        resultText = "❌ FAIL";
-        bgColor = "red";
-    } 
-    else {
-        resultText = "⚠️ UNCERTAIN";
-        bgColor = "orange";
-    }
+            let passProb = 0;
+            let failProb = 0;
 
-    // Show result (create or update)
-    let resultDiv = document.getElementById("result");
+            for (let i = 0; i < maxPredictions; i++) {
+                if (prediction[i].className.toLowerCase() === "pass") {
+                    passProb = prediction[i].probability;
+                } 
+                else if (prediction[i].className.toLowerCase() === "fail") {
+                    failProb = prediction[i].probability;
+                }
 
-    if (!resultDiv) {
-        resultDiv = document.createElement("div");
-        resultDiv.id = "result";
-        resultDiv.style.fontSize = "30px";
-        resultDiv.style.fontWeight = "bold";
-        resultDiv.style.marginTop = "20px";
-        document.body.appendChild(resultDiv);
-    }
+                labelContainer.childNodes[i].innerHTML =
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+            }
 
-    resultDiv.innerHTML = resultText;
-    resultDiv.style.backgroundColor = bgColor;
-    resultDiv.style.padding = "10px";
-}
-``
+            let resultText = "";
+            let bgColor = "";
+
+            if (passProb >= 0.8) {
+                resultText = "✅ PASS";
+                bgColor = "lightgreen";
+            } 
+            else if (failProb >= 0.8) {
+                resultText = "❌ FAIL";
+                bgColor = "red";
+            } 
+            else {
+                resultText = "⚠️ UNCERTAIN";
+                bgColor = "orange";
+            }
+
+            let resultDiv = document.getElementById("result");
+
+            if (!resultDiv) {
+                resultDiv = document.createElement("div");
+                resultDiv.id = "result";
+                resultDiv.style.fontSize = "30px";
+                resultDiv.style.fontWeight = "bold";
+                resultDiv.style.marginTop = "20px";
+                document.body.appendChild(resultDiv);
+            }
+
+            resultDiv.innerHTML = resultText;
+            resultDiv.style.backgroundColor = bgColor;
+            resultDiv.style.padding = "10px";
+            resultDiv.style.textAlign = "center";
+        }
+    </script>
+</body>
+</html>
