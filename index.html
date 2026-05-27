@@ -17,8 +17,10 @@ async function init() {
 
     console.log("Starting webcam...");
     webcam = new tmImage.Webcam(350, 350, true);
-    await webcam.setup();
-    await webcam.play();
+   
+await webcam.setup({ facingMode: "environment" }); // ✅ iPhone fix
+await webcam.play();
+
 
     document.getElementById("webcam-container").appendChild(webcam.canvas);
 
